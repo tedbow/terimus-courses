@@ -19,9 +19,19 @@ Uses Pantheon Multidev
 
 Forked from: https://github.com/magabriel/symfony-cli-skeleton
 
-Basic usage
------------
+Available commands
+------------------
 
+H1 | H2
+-- | --
+help | Displays help for a command
+list | Lists commands
+
+student-create    Create Env
+
+  student-del       Delete  Student Environments
+  student-git-push  Push to Git Students
+  student-push      Push to Students
 
 Customization
 -------------
