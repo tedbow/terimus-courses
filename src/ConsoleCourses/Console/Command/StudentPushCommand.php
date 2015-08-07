@@ -13,11 +13,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 class StudentPushCommand extends CommandBase {
 
-  /**
-   * @var ContainerBuilder
-   */
-  private $container;
-
   protected function configure() {
     parent::configure();
     $this->setName('student-push')

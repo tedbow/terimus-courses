@@ -12,11 +12,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 class StudentGitRebaseCommand extends Command {
 
-  /**
-   * @var ContainerBuilder
-   */
-  private $container;
-
   protected function configure() {
     $this->setName('student-git-push')
       ->setDescription('Push to Git Students')
