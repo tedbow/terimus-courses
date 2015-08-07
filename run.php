@@ -2,7 +2,7 @@
 /*
  * Run the application
  */
-namespace YourNamespace;
+namespace ConsoleCourses;
 
 use Skel\DependencyInjection\Application;
 
