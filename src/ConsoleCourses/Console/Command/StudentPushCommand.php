@@ -20,6 +20,7 @@ class StudentPushCommand extends CommandBase {
   private $container;
 
   protected function configure() {
+    parent::configure();
     $this->setName('student-push')
       ->setDescription('Push to Students')
       ->addArgument(
@@ -37,6 +38,7 @@ class StudentPushCommand extends CommandBase {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
+    parent::execute($input, $output);
     $term_wrapper = new TerminusWrapper($output, $this->getSite(), $this->getHelper('dialog'));
     $force = $input->getOption('force');
     if ($env = $input->getArgument('env')) {

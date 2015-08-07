@@ -7,7 +7,6 @@
 
 namespace ConsoleCourses\Console\Command;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use ConsoleCourses\Console\TerminusWrapper;
@@ -16,16 +15,21 @@ use ConsoleCourses\Console\Command\CommandBase;
 
 class StudentDelCommand extends CommandBase {
   protected function configure() {
+    parent::configure();
     $this->setName('student-del')
-      ->setDescription('Delete All Student Evns')
+      ->setDescription('Delete  Student Environments')
       ->setHelp('This is the help for the test command.');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
+    parent::execute($input, $output);
     $term_wrapper = new TerminusWrapper($output, $this->getSite(), $this->getHelper('dialog'));
-    $envs = $term_wrapper->getStudentEnvs();
-    $env_names = $term_wrapper->getEnvNames($envs);
-    $term_wrapper->delEnvs($env_names);
+    if ($envs = $term_wrapper->getStudentEnvs()) {
+      $env_names = $term_wrapper->getEnvNames($envs);
+      $term_wrapper->delEnvs($env_names);
+    }
+    else {
+      $output->writeln('<info>No environments to delete.</info>');
+    }
   }
-
 }

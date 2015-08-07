@@ -13,9 +13,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 use ConsoleCourses\Console\TerminusWrapper;
 use ConsoleCourses\Console\Command\CommandBase;
 
-
+/**
+ * Class StudentCreateCommand
+ *
+ * @package ConsoleCourses\Console\Command
+ *
+ */
 class StudentCreateCommand extends CommandBase {
   protected function configure() {
+    parent::configure();
     $this->setName('student-create')
       ->setDescription('Create Env')
       ->addArgument(
@@ -28,7 +34,7 @@ class StudentCreateCommand extends CommandBase {
         InputArgument::OPTIONAL,
         'Which env to clone from?'
       )
-      ->setHelp('This is the help for the test command.');
+      ->setHelp('Creates students multidev environments.');
   }
 
   /**
@@ -36,11 +42,11 @@ class StudentCreateCommand extends CommandBase {
    * @param \Symfony\Component\Console\Output\OutputInterface $output
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
+    parent::execute($input, $output);
     $count = $input->getArgument('count');
     $env = $input->getArgument('env');
     $env = $env ? $env : 'dev';
     $term_wrapper = new TerminusWrapper($output, $this->getSite(), $this->getHelper('dialog'));
     $term_wrapper->createEnvs($env, $count);
   }
-
 }
