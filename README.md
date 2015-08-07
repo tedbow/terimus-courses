@@ -21,17 +21,16 @@ Forked from: https://github.com/magabriel/symfony-cli-skeleton
 
 Available commands
 ------------------
-
-H1 | H2
--- | --
-help | Displays help for a command
-list | Lists commands
-
-student-create    Create Env
-
-  student-del       Delete  Student Environments
-  student-git-push  Push to Git Students
-  student-push      Push to Students
+###help
+###list
+###student-create   
+Create Environments
+###student-del
+Delete  Student Environments
+###student-git-push
+Push to Git Students
+###student-push
+Push to Students Environments
 
 Customization
 -------------
