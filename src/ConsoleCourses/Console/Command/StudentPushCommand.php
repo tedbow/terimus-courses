@@ -1,18 +1,18 @@
 <?php
 namespace ConsoleCourses\Console\Command;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use ConsoleCourses\Console\Command\BaseCommand;
+use ConsoleCourses\Console\TerminusWrapper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use ConsoleCourses\Console\Command\CommandBase;
 
 /**
  * Just a Test command...
  */
-class StudentPushCommand extends Command {
+class StudentPushCommand extends CommandBase {
 
   /**
    * @var ContainerBuilder
@@ -37,7 +37,7 @@ class StudentPushCommand extends Command {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
-    $term_wrapper = new TerminusWrapper($output);
+    $term_wrapper = new TerminusWrapper($output, $this->getSite(), $this->getHelper('dialog'));
     $force = $input->getOption('force');
     if ($env = $input->getArgument('env')) {
       if ($term_wrapper->validateEnvName($env)) {

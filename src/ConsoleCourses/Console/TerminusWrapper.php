@@ -5,13 +5,10 @@
  * Time: 10:39 AM
  */
 
-namespace ConsoleCourses\Console\Command;
+namespace ConsoleCourses\Console;
 
 
 use GitWrapper\GitWrapper;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Console\Helper\DialogHelper;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -22,8 +19,29 @@ class TerminusWrapper {
    */
   protected $output;
 
-  function __construct($output) {
+  protected $site;
+
+  protected $dialogHelper;
+
+  /**
+   * @return mixed
+   */
+  public function getDialogHelper() {
+    return $this->dialogHelper;
+  }
+
+  /**
+   * @return mixed
+   */
+  protected function getSite() {
+    return $this->site;
+  }
+
+  function __construct($output, $site, $dialogHelper) {
     $this->output = $output;
+    $this->site = $site;
+    $this->dialogHelper = $dialogHelper;
+    $this->ensureLogin();
     $this->siteNotify();
   }
 
@@ -31,22 +49,13 @@ class TerminusWrapper {
   protected function writeln($str) {
     $this->output->writeln($str);
   }
-  function getSite() {
-    $container = $this->getApplication()->getContainer();
-    $site = $container->getParameter('site');
-    return $site;
-  }
-  function getParameter($param) {
-    $container = $this->getApplication()->getContainer();
-    return $container->getParameter($param);
-  }
   private function ensureLogin() {
 
     if (!$this->isLoggedIn()) {
       /**
        * @var DialogHelper
        */
-      $dialog = $this->getHelper('dialog');
+      $dialog = $this->getDialogHelper();
       $email = $dialog->ask(
         $this->output,
         "What is your Pantheon Email?"
@@ -127,7 +136,7 @@ class TerminusWrapper {
     /**
      * @var DialogHelper $dialog
      */
-    $dialog = $this->getHelper('dialog');
+    $dialog = $this->getDialogHelper();
     $confirm =  $dialog->askConfirmation(
       $this->output,
       "About to clone env $from_env to " . implode(',', $to_envs) . ". <question>Are you sure?</question>"
@@ -176,7 +185,7 @@ class TerminusWrapper {
     $git_wrapper->git('push --force');
   }
   protected function siteNotify() {
-    $this->writeln("Working with: " . $this->getParameter('site'));
+    $this->writeln("Working with: " . $this->getSite());
   }
   public function getEnvNames($envs) {
     return array_map(function($e) {
@@ -184,7 +193,7 @@ class TerminusWrapper {
     }, $envs);
   }
   public function delEnvs($envs) {
-    $dialog = $this->getHelper('dialog');
+    $dialog = $this->getDialogHelper();
     $confirm =  $dialog->askConfirmation(
       $this->output,
       "About to Delete envs " . implode(',', $envs) . ". Are you sure?"
@@ -192,7 +201,6 @@ class TerminusWrapper {
     if ($confirm) {
       foreach ($envs as $env) {
         $this->terminusCommand(
-          $this->output,
           'site',
           'delete-env',
           " --env={$env}"
