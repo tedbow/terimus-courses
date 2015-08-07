@@ -9,9 +9,9 @@ namespace ConsoleCourses\Console;
 
 
 use GitWrapper\GitWrapper;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Console\Helper\DialogHelper;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 class TerminusWrapper {
   /**
@@ -49,6 +49,7 @@ class TerminusWrapper {
   protected function writeln($str) {
     $this->output->writeln($str);
   }
+
   private function ensureLogin() {
 
     if (!$this->isLoggedIn()) {
@@ -63,7 +64,7 @@ class TerminusWrapper {
       $password = $dialog->askHiddenResponse(
         $this->output,
         'What is the Pantheon.io password?',
-        false
+        FALSE
       );
       $process = new Process("terminus auth login $email --json --password=$password");
       $process->run();
@@ -75,16 +76,19 @@ class TerminusWrapper {
       }
     }
   }
+
   private function isLoggedIn() {
     $process = new Process('terminus auth whoami --json');
     $process->run();
     $return = trim($process->getOutput());
     return $return != 'You are not logged in.';
   }
+
   function getEnvs() {
     $this->ensureLogin();
     return $this->terminusCommand('site', 'environments');
   }
+
   function terminusCommand($base, $sub, $suffix = '') {
 
     $cmd_str = 'terminus ' . $base;
@@ -102,7 +106,7 @@ class TerminusWrapper {
     $process->run();
     if ($process->isSuccessful()) {
       $this->writeln('<info>Success!</info>');
-      if ($returned =  json_decode($process->getOutput())) {
+      if ($returned = json_decode($process->getOutput())) {
         return $returned;
       }
       else {
@@ -116,6 +120,7 @@ class TerminusWrapper {
     }
 
   }
+
   function getStudentEnvs() {
     if ($envs = $this->getEnvs()) {
       foreach (array_keys($envs) as $key) {
@@ -126,18 +131,20 @@ class TerminusWrapper {
     }
     return $envs;
   }
+
   function isStudentEnv(\stdClass $env) {
     if (in_array($env->Name, array('dev', 'test', 'live'))) {
       return FALSE;
     }
     return TRUE;
   }
+
   function cloneToEnvs($from_env, $to_envs, $force) {
     /**
      * @var DialogHelper $dialog
      */
     $dialog = $this->getDialogHelper();
-    $confirm =  $dialog->askConfirmation(
+    $confirm = $dialog->askConfirmation(
       $this->output,
       "About to clone env $from_env to " . implode(',', $to_envs) . ". <question>Are you sure?</question>"
     );
@@ -158,9 +165,11 @@ class TerminusWrapper {
       }
     }
   }
+
   protected function keepInSync($env) {
     return $this->getSiteVar($env, 'smt_sync', 1);
   }
+
   protected function getSiteVar($env, $var_name, $default = NULL) {
     $drush_output = $this->terminusCommand(
       'drush',
@@ -177,6 +186,7 @@ class TerminusWrapper {
     }
     return $default;
   }
+
   protected function rebaseEnv($to_env) {
     $this->writeln("Rebasing $to_env with master");
     $git_wrapper = new GitWrapper();
@@ -184,17 +194,20 @@ class TerminusWrapper {
     $git_wrapper->git("rebase master");
     $git_wrapper->git('push --force');
   }
+
   protected function siteNotify() {
     $this->writeln("Working with: " . $this->getSite());
   }
+
   public function getEnvNames($envs) {
-    return array_map(function($e) {
+    return array_map(function ($e) {
       return $e->Name;
     }, $envs);
   }
+
   public function delEnvs($envs) {
     $dialog = $this->getDialogHelper();
-    $confirm =  $dialog->askConfirmation(
+    $confirm = $dialog->askConfirmation(
       $this->output,
       "About to Delete envs " . implode(',', $envs) . ". Are you sure?"
     );
@@ -209,9 +222,10 @@ class TerminusWrapper {
 
     }
   }
+
   public function createEnvs($env, $count) {
     for ($c = 0; $c < $count; $c++) {
-      $env_name =  $this->getSite() . "-" . $c;
+      $env_name = $this->getSite() . "-" . $c;
       $this->terminusCommand(
         'site',
         'create-env',
@@ -219,6 +233,7 @@ class TerminusWrapper {
       );
     }
   }
+
   public function validateEnvName($env_name) {
     $envs = $this->getStudentEnvs();
     $env_names = $this->getEnvNames($envs);

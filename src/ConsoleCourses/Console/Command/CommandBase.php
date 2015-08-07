@@ -13,13 +13,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 
-class CommandBase extends Command{
+class CommandBase extends Command {
   protected $site;
+
   protected function configure() {
     parent::configure();
     $this->addOption(
       'site',
-      null,
+      NULL,
       InputOption::VALUE_REQUIRED,
       'Set Pantheon Site'
     );
@@ -37,6 +38,7 @@ class CommandBase extends Command{
   protected function getSite() {
     return $this->site;
   }
+
   protected function getParameter($param) {
     $container = $this->getApplication()->getContainer();
     return $container->getParameter($param);

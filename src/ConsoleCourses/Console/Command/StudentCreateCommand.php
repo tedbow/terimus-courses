@@ -7,11 +7,10 @@
 
 namespace ConsoleCourses\Console\Command;
 
+use ConsoleCourses\Console\TerminusWrapper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use ConsoleCourses\Console\TerminusWrapper;
-use ConsoleCourses\Console\Command\CommandBase;
 
 /**
  * Class StudentCreateCommand

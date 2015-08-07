@@ -1,13 +1,12 @@
 <?php
 namespace ConsoleCourses\Console\Command;
 
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use ConsoleCourses\Console\TerminusWrapper;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use ConsoleCourses\Console\Command\CommandBase;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Just a Test command...
@@ -30,7 +29,7 @@ class StudentPushCommand extends CommandBase {
       )
       ->addOption(
         'force',
-        null,
+        NULL,
         InputOption::VALUE_NONE,
         'Force regardless of env setting'
       )
