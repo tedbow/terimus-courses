@@ -23,6 +23,8 @@ class TerminusWrapper {
 
   protected $dialogHelper;
 
+  protected $verbose;
+
   /**
    * @return mixed
    */
@@ -89,7 +91,15 @@ class TerminusWrapper {
     return $this->terminusCommand('site', 'environments');
   }
 
-  function terminusCommand($base, $sub, $suffix = '') {
+  /**
+   * @param $base
+   * @param $sub
+   * @param array $options
+   * @param string $suffix
+   *
+   * @return bool|mixed|string
+   */
+  function terminusCommand($base, $sub, $options = [], $suffix = '') {
 
     $cmd_str = 'terminus ' . $base;
     switch ($base) {
@@ -98,7 +108,19 @@ class TerminusWrapper {
         $cmd_str .= ' --site=' . $this->getSite();
         break;
     }
+
     $cmd_str .= " $sub ";
+    if ($options) {
+      foreach ($options as $option_key => $option_value) {
+        $suffix .= " --$option_key";
+        if ($option_value && $option_value !== TRUE) {
+          $suffix .= "=$option_value";
+        }
+
+      }
+      $suffix .= ' ';
+
+    }
     $cmd_str .= " $suffix --json --yes";
     $this->writeln("Executing: $cmd_str");
     $process = new Process($cmd_str);
@@ -115,10 +137,26 @@ class TerminusWrapper {
 
     }
     else {
+      $process->getExitCode();
+      $this->debug($process->getErrorOutput());
       $this->writeln('<error>Failed</error>');
       return FALSE;
     }
 
+  }
+
+  protected function debug($msg) {
+    if ($this->isVerbose()) {
+      $this->output->writeln("<error>$msg</error>");
+    }
+  }
+
+  protected function isVerbose() {
+    $verbose_levels = [OutputInterface::VERBOSITY_DEBUG, OutputInterface::VERBOSITY_VERBOSE, OutputInterface::VERBOSITY_VERY_VERBOSE];
+    if (in_array($this->output->getVerbosity(),$verbose_levels)) {
+      return TRUE;
+    }
+    return FALSE;
   }
 
   function getStudentEnvs() {
@@ -133,13 +171,13 @@ class TerminusWrapper {
   }
 
   function isStudentEnv(\stdClass $env) {
-    if (in_array($env->Name, array('dev', 'test', 'live'))) {
+    if (in_array($env->name, array('dev', 'test', 'live'))) {
       return FALSE;
     }
     return TRUE;
   }
 
-  function cloneToEnvs($from_env, $to_envs, $force) {
+  function cloneToEnvs($from_env, $to_envs, $force, $options) {
     /**
      * @var DialogHelper $dialog
      */
@@ -149,14 +187,23 @@ class TerminusWrapper {
       "About to clone env $from_env to " . implode(',', $to_envs) . ". <question>Are you sure?</question>"
     );
     if ($confirm) {
+      $git_push = !empty($options['git-push']);
+      // Don't pass on git-push option
+      unset($options['git-push']);
       foreach ($to_envs as $to_env) {
 
         if ($force || $this->keepInSync($to_env)) {
-          $this->rebaseEnv($to_env);
+          if ($git_push) {
+            $this->rebaseEnv($to_env);
+          }
+
           $this->terminusCommand(
             'site',
-            'clone-env',
-            " --from-env=$from_env --to-env={$to_env} --db=yes --files=yes"
+            'clone-content',
+            [
+              'from-env' => $from_env,
+              'to-env' => $to_env,
+            ] + $options
           );
         }
         else {
@@ -174,7 +221,7 @@ class TerminusWrapper {
     $drush_output = $this->terminusCommand(
       'drush',
       "vget $var_name",
-      " --env=$env"
+      ['env' => $env ]
     );
     $lines = explode("\n", $drush_output);
     foreach ($lines as $line) {
@@ -201,7 +248,7 @@ class TerminusWrapper {
 
   public function getEnvNames($envs) {
     return array_map(function ($e) {
-      return $e->Name;
+      return $e->name;
     }, $envs);
   }
 
@@ -216,7 +263,7 @@ class TerminusWrapper {
         $this->terminusCommand(
           'site',
           'delete-env',
-          " --env={$env}"
+          [ 'env' => $env ]
         );
       }
 
@@ -224,14 +271,37 @@ class TerminusWrapper {
   }
 
   public function createEnvs($env, $count) {
-    for ($c = 0; $c < $count; $c++) {
-      $env_name = $this->getSite() . "-" . $c;
-      $this->terminusCommand(
-        'site',
-        'create-env',
-        " --env=$env_name --from-env=$env"
-      );
+    $confirm = $this->confirm( "About to Create envs $count environments. Are you sure?");
+    if ($confirm) {
+      $start_index = $this->getNextSiteIndex();
+      for ($c = $start_index; $c < $count + $start_index; $c++) {
+        $env_name = $this->createEnvName($c);
+        $this->terminusCommand(
+          'site',
+          'create-env',
+          [
+            'to-env' => $env_name,
+            'from-env' => $env,
+          ]
+        );
+      }
     }
+  }
+
+  protected function getNextSiteIndex() {
+    $max = 0;
+    if ($envs = $this->getStudentEnvs()) {
+      $env_names = $this->getEnvNames($envs);
+      $max = -1;
+      foreach ($env_names as $env_name) {
+        $parts = explode('-', $env_name);
+        $index = (int)array_pop($parts);
+        if ($index > $max) {
+          $max = $index;
+        }
+      }
+    }
+    return $max + 1;
   }
 
   public function validateEnvName($env_name) {
@@ -241,5 +311,31 @@ class TerminusWrapper {
       return TRUE;
     }
     return FALSE;
+  }
+
+  /**
+   * @param $count
+   *
+   * @return mixed
+   */
+  protected function confirm($msg) {
+    $dialog = $this->getDialogHelper();
+    $confirm = $dialog->askConfirmation(
+      $this->output, $msg
+    );
+    return $confirm;
+  }
+
+  /**
+   * @param $c
+   *
+   * @return string
+   */
+  protected function createEnvName($index) {
+    $site_name = $this->getSite();
+    // Pantheon puts a 11 character limit on environment names.
+    $site_name = substr($site_name,0, 8);
+    $env_name = $site_name . "-" . $index;
+    return $env_name;
   }
 }

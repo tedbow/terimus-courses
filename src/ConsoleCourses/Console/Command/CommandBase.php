@@ -16,6 +16,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class CommandBase extends Command {
   protected $site;
 
+  protected $passThruOptions = [];
+
   protected function configure() {
     parent::configure();
     $this->addOption(
@@ -27,6 +29,7 @@ class CommandBase extends Command {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
+
     if ($site = $input->getOption('site')) {
       $this->site = $site;
     }
@@ -42,6 +45,22 @@ class CommandBase extends Command {
   protected function getParameter($param) {
     $container = $this->getApplication()->getContainer();
     return $container->getParameter($param);
+  }
+
+  protected function getPassThruOptionsValues(InputInterface $input) {
+    $options = [];
+    if ($this->passThruOptions) {
+      foreach ($this->passThruOptions as $option) {
+        if ($input->hasOption($option)) {
+          $option_value = $input->getOption($option);
+          if ($option_value !== FALSE) {
+            $options[$option] = $input->getOption($option);
+          }
+
+        }
+      }
+    }
+    return $options;
   }
 
 }

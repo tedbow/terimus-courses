@@ -5,3 +5,4 @@ composer.lock
 .project
 .settings
 /nbproject/private/
+/app/config/config.yml
