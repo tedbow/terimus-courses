@@ -17,6 +17,8 @@ Description
 
 Uses Pantheon Multidev
 
+Requires [Pantheon CLI](https://github.com/pantheon-systems/cli)
+
 Forked from: https://github.com/magabriel/symfony-cli-skeleton
 
 Available commands
@@ -40,7 +42,9 @@ Customization
 Build
 -----
 
-Execute `php build.php` and a `phar` file will be automagically generated inside the `build/` project subdirectory. You can rename or/and copy this `phar` file to wherever you want and use it to execute you shinny CLI application.   
+Execute `php build.php` and a `phar` file will be automagically generated inside the `build/` project subdirectory. You can rename or/and copy this `phar` file to wherever you want and use it to execute you shinny CLI application.
+   
+phar.readonly = 0 must be set in your php.ini file.
 
 About versions
 --------------

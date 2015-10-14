@@ -4,7 +4,7 @@ imports:
 
 parameters:
   application:
-    name:         Symfony CLI skeleton
-    slug:         symcliskel    # Used to name the built phar
-    description:  "Basic skeleton for building Symfony Command Line Interface (CLI) applications"
+    name:         Course CLI added to Terminus
+    slug:         courses-cli    # Used to name the built phar
+    description:  "@todo add description"
   site: "beg-test"

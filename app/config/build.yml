@@ -1,2 +1,2 @@
 parameters:
-    version: { template: '0.1.*', current: 0.1.0 }
+    version: { template: '0.1.*', current: 0.1.1 }
